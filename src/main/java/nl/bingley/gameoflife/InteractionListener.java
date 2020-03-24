@@ -1,77 +1,50 @@
 package nl.bingley.gameoflife;
 
+import org.springframework.stereotype.Component;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+@Component
 public class InteractionListener implements KeyListener {
 
-    private final int universeX;
-    private final int universeY;
-    private final int universeInitialSize;
+    private final Universe universe;
     private final UniversePanel universePanel;
-    private int refreshInterval;
 
-    public InteractionListener(UniversePanel universePanel, int universeX, int universeY, int universeInitialSize, int refreshInterval) {
-        this.universeX = universeX;
-        this.universeY = universeY;
-        this.universeInitialSize = universeInitialSize;
+    public InteractionListener(Universe universe, UniversePanel universePanel) {
+        this.universe = universe;
         this.universePanel = universePanel;
-        universePanel.addKeyListener(this);
-        this.refreshInterval = refreshInterval;
     }
 
     @Override
     public void keyPressed(KeyEvent keyEvent) {
         switch (keyEvent.getKeyCode()) {
             case KeyEvent.VK_SPACE:
-                universePanel.pause = !universePanel.pause;
+                universe.setPaused(!universe.isPaused());
                 break;
             case KeyEvent.VK_ENTER:
             case KeyEvent.VK_BACK_SPACE:
-                refresh();
+                universe.refresh();
                 break;
             case KeyEvent.VK_UP:
-                increaseRefreshInterval();
+                universePanel.increaseRefreshInterval();
                 break;
             case KeyEvent.VK_DOWN:
-                decreaseRefreshInterval();
+                universePanel.decreaseRefreshInterval();
                 break;
             case KeyEvent.VK_RIGHT:
-                universePanel.manualTick = true;
+                if (universe.isPaused()) {
+                    universe.tick();
+                }
                 break;
             case KeyEvent.VK_P:
-                universePanel.log("Universe initial state:");
+                System.out.println("Universe initial state:");
+                System.out.println(universe.toString());
                 break;
             case KeyEvent.VK_R:
-                restart();
+                universe.restart();
                 break;
         }
-    }
-
-    private void restart() {
-        Universe universe = new Universe(universeX, universeY, universePanel.getUniverseString());
-        universePanel.setUniverse(universe);
-        universePanel.pause = false;
-    }
-
-    private void refresh() {
-        Universe universe = new Universe(universeX, universeY, universeInitialSize);
-        universePanel.setUniverse(universe);
-        universePanel.pause = false;
-    }
-
-    private void increaseRefreshInterval() {
-        if (refreshInterval < 1024) {
-            refreshInterval = refreshInterval * 2;
-        }
-        universePanel.setRefreshInterval(refreshInterval);
-    }
-
-    private void decreaseRefreshInterval() {
-        if (refreshInterval > 8) {
-            refreshInterval = refreshInterval / 2;
-        }
-        universePanel.setRefreshInterval(refreshInterval);
     }
 
     @Override

@@ -1,76 +1,99 @@
 package nl.bingley.gameoflife;
 
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class Universe {
 
-    private final int boundaryX;
-    private final int boundaryY;
+    private static final int initialSize = 5;
+    private static final int universeX = 400;
+    private static final int universeY = 250;
 
     private Boolean[][] previousState;
     private Boolean[][] currentState;
 
-    //ew don't look
-    public int currentBorn;
-    public int currentAlive;
-    public int currentDied;
+    private boolean paused = false;
+
+    private int generation;
+    private int currentBorn;
+    private int currentAlive;
+    private int currentDied;
 
     private final StringBuilder initialState;
 
-    public Universe(int boundaryX, int boundaryY, int initialSize) {
+    public Universe() {
         initialState = new StringBuilder();
-        this.boundaryX = boundaryX;
-        this.boundaryY = boundaryY;
-        previousState = new Boolean[boundaryX][boundaryY];
-        currentState = new Boolean[boundaryX][boundaryY];
-        initialize(initialSize);
+        previousState = new Boolean[universeX][universeY];
+        currentState = new Boolean[universeX][universeY];
+        initialize();
     }
 
-    public Universe(int boundaryX, int boundaryY, String generated) {
+    public Universe(String generated) {
         initialState = new StringBuilder();
         initialState.append(generated);
-        this.boundaryX = boundaryX;
-        this.boundaryY = boundaryY;
-        previousState = new Boolean[boundaryX][boundaryY];
-        currentState = new Boolean[boundaryX][boundaryY];
-        String[] rows = generated.split(System.lineSeparator());
-        int xStart = boundaryX / 2 - rows.length / 2;
-        for (int x = xStart; x < xStart + rows.length; x++) {
-            int yStart = boundaryY / 2 - rows.length / 2;
-            for (int y = yStart; y < yStart + rows.length; y++) {
-                currentState[x][y] = rows[y - yStart].charAt(x - xStart) == '0';
+        previousState = new Boolean[universeX][universeY];
+        currentState = generate(generated);
+    }
+
+    public void refresh() {
+        previousState = new Boolean[universeX][universeY];
+        currentState = new Boolean[universeX][universeY];
+        initialize();
+    }
+
+    public void restart() {
+        previousState = new Boolean[universeX][universeY];
+        currentState = generate(initialState.toString());
+    }
+
+    public void tick() {
+        generation++;
+        currentBorn = 0;
+        currentAlive = 0;
+        currentDied = 0;
+        Boolean[][] nextState = new Boolean[universeX][universeY];
+        for (int x = 0; x < universeX; x++) {
+            for (int y = 0; y < universeY; y++) {
+                nextState[x][y] = getNextState(x, y);
             }
         }
+        previousState = currentState;
+        currentState = nextState;
     }
 
-    private void initialize(int initialSize) {
-        int yStart = boundaryY / 2 - initialSize / 2;
-        for (int y = yStart; y < yStart + initialSize; y++) {
-            int xStart = boundaryX / 2 - initialSize / 2;
-            for (int x = xStart; x < xStart + initialSize; x++) {
-                long random = Math.round(Math.random());
-                if (random == 1) {
-                    currentState[x][y] = true;
-                    initialState.append('0');
-                } else {
-                    initialState.append('.');
-                }
-            }
-            initialState.append(System.lineSeparator());
-        }
+    public int getUniverseX() {
+        return universeX;
     }
 
-    public void setState(boolean value, int x, int y) {
-        currentState[x][y] = value;
+    public int getUniverseY() {
+        return universeY;
     }
 
-    public boolean getState(int x, int y) {
-        if (currentState[x][y] != null) {
-            return currentState[x][y];
-        } else {
-            return false;
-        }
+    public int getGeneration() {
+        return generation;
+    }
+
+    public int getCurrentBorn() {
+        return currentBorn;
+    }
+
+    public int getCurrentAlive() {
+        return currentAlive;
+    }
+
+    public int getCurrentDied() {
+        return currentDied;
+    }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
     }
 
     public boolean getPreviousState(int x, int y) {
@@ -81,26 +104,12 @@ public class Universe {
         }
     }
 
-    public void tick() {
-        currentBorn = 0;
-        currentAlive = 0;
-        currentDied = 0;
-        Boolean[][] nextState = new Boolean[boundaryX][boundaryY];
-        for (int x = 0; x < boundaryX; x++) {
-            for (int y = 0; y < boundaryY; y++) {
-                nextState[x][y] = getNextState(x, y);
-            }
+    public boolean getState(int x, int y) {
+        if (currentState[x][y] != null) {
+            return currentState[x][y];
+        } else {
+            return false;
         }
-        previousState = currentState;
-        currentState = nextState;
-    }
-
-    public int getBoundaryX() {
-        return boundaryX;
-    }
-
-    public int getBoundaryY() {
-        return boundaryY;
     }
 
     private boolean getNextState(int x, int y) {
@@ -128,32 +137,49 @@ public class Universe {
         }
     }
 
-//    private int countAdjacentCells(int x, int y) {
-//        List<Boolean> states = new ArrayList<>();
-//        states.add(getStateStopAtBoundary(x - 1, y - 1));
-//        states.add(getStateStopAtBoundary(x - 1, y));
-//        states.add(getStateStopAtBoundary(x - 1, y + 1));
-//        states.add(getStateStopAtBoundary(x, y - 1));
-//        states.add(getStateStopAtBoundary(x, y + 1));
-//        states.add(getStateStopAtBoundary(x + 1, y - 1));
-//        states.add(getStateStopAtBoundary(x + 1, y));
-//        states.add(getStateStopAtBoundary(x + 1, y + 1));
-//
-//        return (int) states.stream()
-//                .filter(Boolean::booleanValue)
-//                .count();
-//    }
+    private void initialize() {
+        initialState.delete(0, initialState.length());
+        generation = 0;
+        int yStart = universeY / 2 - initialSize / 2;
+        for (int y = yStart; y < yStart + initialSize; y++) {
+            int xStart = universeX / 2 - initialSize / 2;
+            for (int x = xStart; x < xStart + initialSize; x++) {
+                long random = Math.round(Math.random());
+                if (random == 1) {
+                    currentState[x][y] = true;
+                    initialState.append('0');
+                } else {
+                    initialState.append('.');
+                }
+            }
+            initialState.append(System.lineSeparator());
+        }
+    }
+
+    private Boolean[][] generate(String generated) {
+        generation = 0;
+        Boolean[][] state = new Boolean[universeX][universeY];
+        String[] rows = generated.split(System.lineSeparator());
+        int xStart = universeX / 2 - rows.length / 2;
+        for (int x = xStart; x < xStart + rows.length; x++) {
+            int yStart = universeY / 2 - rows.length / 2;
+            for (int y = yStart; y < yStart + rows.length; y++) {
+                state[x][y] = rows[y - yStart].charAt(x - xStart) == '0';
+            }
+        }
+        return state;
+    }
 
     private int countAdjacentCells(int x, int y) {
         List<Boolean> states = new ArrayList<>();
-        states.add(getState(wrapAtBoundary(x - 1, boundaryX), wrapAtBoundary(y - 1, boundaryY)));
-        states.add(getState(wrapAtBoundary(x - 1, boundaryX), wrapAtBoundary(y, boundaryY)));
-        states.add(getState(wrapAtBoundary(x - 1, boundaryX), wrapAtBoundary(y + 1, boundaryY)));
-        states.add(getState(wrapAtBoundary(x, boundaryX), wrapAtBoundary(y - 1, boundaryY)));
-        states.add(getState(wrapAtBoundary(x, boundaryX), wrapAtBoundary(y + 1, boundaryY)));
-        states.add(getState(wrapAtBoundary(x + 1, boundaryX), wrapAtBoundary(y - 1, boundaryY)));
-        states.add(getState(wrapAtBoundary(x + 1, boundaryX), wrapAtBoundary(y, boundaryY)));
-        states.add(getState(wrapAtBoundary(x + 1, boundaryX), wrapAtBoundary(y + 1, boundaryY)));
+        states.add(getState(wrapAtBoundary(x - 1, universeX), wrapAtBoundary(y - 1, universeY)));
+        states.add(getState(wrapAtBoundary(x - 1, universeX), wrapAtBoundary(y, universeY)));
+        states.add(getState(wrapAtBoundary(x - 1, universeX), wrapAtBoundary(y + 1, universeY)));
+        states.add(getState(wrapAtBoundary(x, universeX), wrapAtBoundary(y - 1, universeY)));
+        states.add(getState(wrapAtBoundary(x, universeX), wrapAtBoundary(y + 1, universeY)));
+        states.add(getState(wrapAtBoundary(x + 1, universeX), wrapAtBoundary(y - 1, universeY)));
+        states.add(getState(wrapAtBoundary(x + 1, universeX), wrapAtBoundary(y, universeY)));
+        states.add(getState(wrapAtBoundary(x + 1, universeX), wrapAtBoundary(y + 1, universeY)));
 
         return (int) states.stream()
                 .filter(Boolean::booleanValue)
@@ -165,14 +191,6 @@ public class Universe {
             return boundary + pos;
         } else {
             return pos % boundary;
-        }
-    }
-
-    private boolean getStateStopAtBoundary(int x, int y) {
-        if (x < 0 || y < 0 || x >= boundaryX || y >= boundaryY) {
-            return false;
-        } else {
-            return getState(x, y);
         }
     }
 
