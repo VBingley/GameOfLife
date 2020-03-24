@@ -1,8 +1,9 @@
 package nl.bingley.gameoflife;
 
+import nl.bingley.gameoflife.listeners.MovementListener;
+import nl.bingley.gameoflife.listeners.SettingsListener;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
 import javax.annotation.PostConstruct;
@@ -13,14 +14,14 @@ import java.awt.*;
 @SpringBootApplication
 public class Application {
 
-    private final Universe universe;
     private final UniversePanel universePanel;
-    private final InteractionListener listener;
+    private final SettingsListener settingsListener;
+    private final MovementListener movementListener;
 
-    public Application(Universe universe, UniversePanel universePanel, InteractionListener listener) {
-        this.universe = universe;
+    public Application(UniversePanel universePanel, SettingsListener settingsListener, MovementListener movementListener) {
         this.universePanel = universePanel;
-        this.listener = listener;
+        this.settingsListener = settingsListener;
+        this.movementListener = movementListener;
     }
 
     //Guns, these produce gliders
@@ -35,7 +36,7 @@ public class Application {
             "000000000000110000000000000000000000"; //x=36
 
     public static void main(String[] args) {
-        ApplicationContext context = new SpringApplicationBuilder(Application.class).headless(false).run(args);
+        new SpringApplicationBuilder(Application.class).headless(false).run(args);
     }
 
     @PostConstruct
@@ -44,12 +45,12 @@ public class Application {
         Font font = new Font(Font.MONOSPACED, Font.BOLD, 20);
         universePanel.setFont(font);
         universePanel.setFocusable(true);
-        universePanel.addKeyListener(listener);
+        universePanel.addKeyListener(settingsListener);
+        universePanel.addMouseListener(movementListener);
+        universePanel.addMouseMotionListener(movementListener);
         frame.getContentPane().add(universePanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        int scaleMultiplier = universePanel.getScaleMultiplier();
-        frame.setSize(universe.getUniverseX() * scaleMultiplier + scaleMultiplier * scaleMultiplier,
-                universe.getUniverseY() * scaleMultiplier + scaleMultiplier * scaleMultiplier);
+        frame.setSize(2000, 1000);
         frame.setVisible(true);
     }
 }

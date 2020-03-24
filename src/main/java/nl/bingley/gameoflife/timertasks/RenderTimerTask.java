@@ -16,6 +16,8 @@ public class RenderTimerTask extends TimerTask {
 
     @Override
     public void run() {
-        universePanel.repaint();
+        if (!universePanel.isPainting()) {
+            universePanel.repaint();
+        }
     }
 }

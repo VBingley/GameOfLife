@@ -1,17 +1,19 @@
-package nl.bingley.gameoflife;
+package nl.bingley.gameoflife.listeners;
 
+import nl.bingley.gameoflife.UniversePanel;
+import nl.bingley.gameoflife.model.Universe;
 import org.springframework.stereotype.Component;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 @Component
-public class InteractionListener implements KeyListener {
+public class SettingsListener implements KeyListener {
 
     private final Universe universe;
     private final UniversePanel universePanel;
 
-    public InteractionListener(Universe universe, UniversePanel universePanel) {
+    public SettingsListener(Universe universe, UniversePanel universePanel) {
         this.universe = universe;
         this.universePanel = universePanel;
     }

@@ -1,7 +1,7 @@
 package nl.bingley.gameoflife.timertasks;
 
-import nl.bingley.gameoflife.Universe;
 import nl.bingley.gameoflife.UniversePanel;
+import nl.bingley.gameoflife.model.Universe;
 import org.springframework.stereotype.Component;
 
 import java.util.TimerTask;
@@ -22,13 +22,14 @@ public class TickTimerTask extends TimerTask {
 
     @Override
     public void run() {
-        if ((!universe.isPaused()) && lastTick < System.currentTimeMillis() - universePanel.getRefreshInterval()) {
-            int lastBorn = universe.getCurrentBorn();
-            int lastAlive = universe.getCurrentAlive();
-            int lastDied = universe.getCurrentDied();
+        if (!universe.isPaused() && lastTick < System.currentTimeMillis() - universePanel.getRefreshInterval()) {
+            int lastBorn = universe.getBornCells().size();
+            int lastAlive = universe.getAliveCells().size();
+            int lastDied = universe.getDiedCells().size();
             universe.tick();
-            if (lastBorn == lastDied && universe.getCurrentBorn() == universe.getCurrentDied()
-                    && lastBorn == universe.getCurrentBorn() && lastAlive == universe.getCurrentAlive() && lastDied == universe.getCurrentDied()) {
+            if (lastBorn == lastDied && universe.getBornCells().size() == universe.getDiedCells().size()
+                    && lastBorn == universe.getBornCells().size() && lastAlive == universe.getAliveCells().size()
+                    && lastDied == universe.getDiedCells().size()) {
                 if (universe.getGeneration() >= generationRecord) {
                     System.out.println("Universe lasted to gen " + universe.getGeneration() + ':');
                     System.out.println(universe.toString());
