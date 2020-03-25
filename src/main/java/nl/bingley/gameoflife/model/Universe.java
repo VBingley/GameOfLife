@@ -2,117 +2,56 @@ package nl.bingley.gameoflife.model;
 
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
 
 @Component
 public class Universe {
 
     private static final int initialSize = 64;
 
-    private final Set<Cell> bornCells;
-    private final Set<Cell> aliveCells;
-    private final Set<Cell> diedCells;
-
     private boolean paused = false;
 
+    private Space space;
     private int generation;
+    private int born;
+    private int alive;
+    private int died;
 
     private final StringBuilder initialPattern;
 
     public Universe() {
         initialPattern = new StringBuilder();
-        bornCells = new HashSet<>();
-        aliveCells = new HashSet<>();
-        diedCells = new HashSet<>();
+        space = new Space();
         initialize();
     }
 
     public Universe(String generated) {
         initialPattern = new StringBuilder();
         initialPattern.append(generated);
-        bornCells = new HashSet<>();
-        aliveCells = new HashSet<>();
-        diedCells = new HashSet<>();
+        space = new Space();
         generate();
     }
 
     public void refresh() {
-        bornCells.clear();
-        aliveCells.clear();
-        diedCells.clear();
+        space = new Space();
         initialize();
     }
 
     public void restart() {
-        bornCells.clear();
-        aliveCells.clear();
-        diedCells.clear();
+        space = new Space();
         generate();
-    }
-
-    public void tick() {
-        generation++;
-        diedCells.clear();
-        Set<Cell> newAliveCells = new HashSet<>();
-        Set<Cell> newBornCells = new HashSet<>();
-        HashSet<Cell> allCells = new HashSet<>(bornCells);
-        allCells.addAll(aliveCells);
-        for (Cell cell : allCells) {
-            for (long x = cell.getPositionX() - 1; x <= cell.getPositionX() + 1; x++) {
-                for (long y = cell.getPositionY() - 1; y <= cell.getPositionY() + 1; y++) {
-                    if (x == cell.getPositionX() && y == cell.getPositionY()) {
-                        if (hasCellAfterTick(allCells, x, y)) {
-                            newAliveCells.add(cell);
-                        } else {
-                            diedCells.add(cell);
-                        }
-                    } else if (isCellEmpty(allCells, x, y) && isCellEmpty(newBornCells, x, y) && hasCellAfterTick(allCells, x, y)) {
-                        newBornCells.add(new Cell(x, y));
-                    }
-                }
-            }
-        }
-        bornCells.clear();
-        aliveCells.clear();
-        bornCells.addAll(newBornCells);
-        aliveCells.addAll(newAliveCells);
-    }
-
-    public Set<Cell> getBornCells() {
-        return bornCells;
-    }
-
-    public Set<Cell> getAliveCells() {
-        return aliveCells;
-    }
-
-    public Set<Cell> getDiedCells() {
-        return diedCells;
-    }
-
-    public int getGeneration() {
-        return generation;
-    }
-
-    public boolean isPaused() {
-        return paused;
-    }
-
-    public void setPaused(boolean paused) {
-        this.paused = paused;
     }
 
     private void initialize() {
         initialPattern.delete(0, initialPattern.length());
         generation = 0;
-        long yStart = -initialSize / 2;
-        for (long y = yStart; y < yStart + initialSize; y++) {
-            long xStart = -initialSize / 2;
-            for (long x = xStart; x < xStart + initialSize; x++) {
+        int yStart = -initialSize / 2;
+        for (int y = yStart; y < yStart + initialSize; y++) {
+            int xStart = -initialSize / 2;
+            for (int x = xStart; x < xStart + initialSize; x++) {
                 long random = Math.round(Math.random());
                 if (random == 1) {
-                    bornCells.add(new Cell(x, y));
+                    space.addCell(x, y);
                     initialPattern.append('0');
                 } else {
                     initialPattern.append('.');
@@ -130,33 +69,75 @@ public class Universe {
             int yStart = -rows.length / 2;
             for (int y = yStart; y < yStart + rows.length; y++) {
                 if (rows[y - yStart].charAt(x - xStart) == '0') {
-                    bornCells.add(new Cell(x, y));
+                    space.addCell(x, y);
                 }
             }
         }
     }
 
-    private boolean isCellEmpty(Set<Cell> allCells, long posX, long posY) {
-        return allCells.stream()
-                .noneMatch(cell -> cell.getPositionX() == posX && cell.getPositionY() == posY);
+    public void tick() {
+        generation++;
+        Space newSpace = new Space();
+        for (Cell cell : space.getAliveCells()) {
+            for (int x = cell.getPositionX() - 1; x <= cell.getPositionX() + 1; x++) {
+                for (int y = cell.getPositionY() - 1; y <= cell.getPositionY() + 1; y++) {
+                    if (!newSpace.isAlive(x, y) && isAliveAfterTick(x, y)) {
+                        newSpace.addCell(x, y);
+                    }
+                }
+            }
+        }
+        space = newSpace;
     }
 
-    private boolean hasCellAfterTick(Set<Cell> allCells, long posX, long posY) {
-        boolean isEmpty = isCellEmpty(allCells, posX, posY);
-        long adjacentCells = countAdjacentCells(allCells, posX, posY);
-        return (isEmpty && adjacentCells == 3) || (!isEmpty && (adjacentCells == 2 || adjacentCells == 3));
+    private boolean isAliveAfterTick(int x, int y) {
+        boolean isAlive = space.isAlive(x, y);
+        int adjacentCells = countAdjacentCells(x, y);
+        return (!isAlive && adjacentCells == 3) || (isAlive && (adjacentCells == 2 || adjacentCells == 3));
     }
 
-    private long countAdjacentCells(Set<Cell> allCells, long posX, long posY) {
-        return allCells.stream()
-                .filter(cell -> cell.getPositionX() >= posX - 1 && cell.getPositionX() <= posX + 1
-                        && cell.getPositionY() >= posY - 1 && cell.getPositionY() <= posY + 1
-                        && !(cell.getPositionX() == posX && cell.getPositionY() == posY))
-                .count();
+    private int countAdjacentCells(int posX, int posY) {
+        int counter = 0;
+        for (int x = posX - 1; x <= posX + 1; x++) {
+            for (int y = posY - 1; y <= posY + 1; y++) {
+                if (!(x == posX && y == posY) && space.isAlive(x, y)) {
+                    counter++;
+                }
+            }
+        }
+        return counter;
     }
 
     @Override
     public String toString() {
         return initialPattern.toString();
+    }
+
+    public int getGeneration() {
+        return generation;
+    }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
+    }
+
+    public Collection<Cell> getAliveCells() {
+        return space.getAliveCells();
+    }
+
+    public int getBorn() {
+        return born;
+    }
+
+    public int getAlive() {
+        return alive;
+    }
+
+    public int getDied() {
+        return died;
     }
 }

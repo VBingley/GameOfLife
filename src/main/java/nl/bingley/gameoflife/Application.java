@@ -50,7 +50,7 @@ public class Application {
         universePanel.addMouseMotionListener(movementListener);
         frame.getContentPane().add(universePanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(2000, 1000);
+        frame.setSize(1000, 1000);
         frame.setVisible(true);
     }
 }

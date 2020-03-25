@@ -2,19 +2,19 @@ package nl.bingley.gameoflife.model;
 
 public class Cell {
 
-    private final long positionX;
-    private final long positionY;
+    private final int positionX;
+    private final int positionY;
 
-    public Cell(long positionX, long positionY) {
+    public Cell(int positionX, int positionY) {
         this.positionX = positionX;
         this.positionY = positionY;
     }
 
-    public long getPositionX() {
+    public int getPositionX() {
         return positionX;
     }
 
-    public long getPositionY() {
+    public int getPositionY() {
         return positionY;
     }
 }

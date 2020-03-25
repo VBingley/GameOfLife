@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,24 +37,25 @@ public class UniversePanel extends JPanel {
         width = bounds.width;
         height = bounds.height;
         graphics.fillRect(0, 0, width, height);
-        paintCells(graphics, (universe.getBornCells()), Color.GREEN, Color.BLUE);
-        paintCells(graphics, (universe.getAliveCells()), Color.BLUE, Color.BLUE);
-        paintCells(graphics, (universe.getDiedCells()), Color.GRAY, Color.PINK);
+        paintCells(graphics, universe.getAliveCells(), Color.GREEN, Color.BLUE);
+//        paintCells(graphics, (universe.getBornCells()), Color.GREEN, Color.BLUE);
+//        paintCells(graphics, (universe.getAliveCells()), Color.BLUE, Color.BLUE);
+//        paintCells(graphics, (universe.getDiedCells()), Color.GRAY, Color.PINK);
 
         graphics.setColor(Color.RED);
         graphics.drawString("Gen:  " + universe.getGeneration(), 10, 20);
         graphics.drawString("Ref:  " + refreshInterval, 10, 40);
-        graphics.drawString("Born: " + universe.getBornCells().size(), 10, 80);
-        graphics.drawString("Live: " + universe.getAliveCells().size(), 10, 100);
-        graphics.drawString("Died: " + universe.getDiedCells().size(), 10, 120);
+//        graphics.drawString("Born: " + universe.getBornCells().size(), 10, 80);
+//        graphics.drawString("Live: " + universe.getAliveCells().size(), 10, 100);
+//        graphics.drawString("Died: " + universe.getDiedCells().size(), 10, 120);
         graphics.dispose();
         painting = false;
     }
 
-    private void paintCells(Graphics graphics, Set<Cell> cells, Color fill, Color border) {
+    private void paintCells(Graphics graphics, Collection<Cell> cells, Color fill, Color border) {
         for (Cell cell : cells) {
-            int posX = (int) cell.getPositionX() * scaleMultiplier + translateX + width / 2;
-            int posY = (int) cell.getPositionY() * scaleMultiplier + translateY + height / 2;
+            int posX = cell.getPositionX() * scaleMultiplier + translateX + width / 2;
+            int posY = cell.getPositionY() * scaleMultiplier + translateY + height / 2;
             paintCell(graphics, posX, posY, fill, border);
         }
     }
