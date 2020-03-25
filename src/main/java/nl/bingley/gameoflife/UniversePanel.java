@@ -45,9 +45,9 @@ public class UniversePanel extends JPanel {
         graphics.setColor(Color.RED);
         graphics.drawString("Gen:  " + universe.getGeneration(), 10, 20);
         graphics.drawString("Ref:  " + refreshInterval, 10, 40);
-//        graphics.drawString("Born: " + universe.getBornCells().size(), 10, 80);
-//        graphics.drawString("Live: " + universe.getAliveCells().size(), 10, 100);
-//        graphics.drawString("Died: " + universe.getDiedCells().size(), 10, 120);
+        graphics.drawString("Born: " + universe.getBorn(), 10, 80);
+        graphics.drawString("Live: " + universe.getAlive(), 10, 100);
+        graphics.drawString("Died: " + universe.getDied(), 10, 120);
         graphics.dispose();
         painting = false;
     }
@@ -83,7 +83,7 @@ public class UniversePanel extends JPanel {
     }
 
     public void decreaseRefreshInterval() {
-        if (refreshInterval > 8) {
+        if (refreshInterval > 4) {
             refreshInterval = refreshInterval / 2;
         }
     }
