@@ -7,7 +7,7 @@ import java.util.Collection;
 @Component
 public class Universe {
 
-    private static final int initialSize = 64;
+    private static final int initialSize = 128;
 
     private boolean paused = false;
 
@@ -42,6 +42,47 @@ public class Universe {
         generate();
     }
 
+    public void tick() {
+        generation++;
+        born = 0;
+        alive = 0;
+        died = 0;
+        Space newSpace = new Space();
+        for (Cell cell : space.getAliveCells()) {
+            for (int x = cell.getPositionX() - 1; x <= cell.getPositionX() + 1; x++) {
+                for (int y = cell.getPositionY() - 1; y <= cell.getPositionY() + 1; y++) {
+                    if (!newSpace.isAlive(x, y) && isAliveAfterTick(x, y)) {
+                        newSpace.addCell(x, y);
+                        if (space.isAlive(x, y)) {
+                            alive++;
+                        } else {
+                            born++;
+                        }
+                    }
+                }
+            }
+        }
+        space = newSpace;
+    }
+
+    private boolean isAliveAfterTick(int x, int y) {
+        boolean isAlive = space.isAlive(x, y);
+        int adjacentCells = countAdjacentCells(x, y);
+        return (!isAlive && adjacentCells == 3) || (isAlive && (adjacentCells == 2 || adjacentCells == 3));
+    }
+
+    private int countAdjacentCells(int posX, int posY) {
+        int counter = 0;
+        for (int x = posX - 1; x <= posX + 1; x++) {
+            for (int y = posY - 1; y <= posY + 1; y++) {
+                if (!(x == posX && y == posY) && space.isAlive(x, y)) {
+                    counter++;
+                }
+            }
+        }
+        return counter;
+    }
+
     private void initialize() {
         initialPattern.delete(0, initialPattern.length());
         generation = 0;
@@ -73,39 +114,6 @@ public class Universe {
                 }
             }
         }
-    }
-
-    public void tick() {
-        generation++;
-        Space newSpace = new Space();
-        for (Cell cell : space.getAliveCells()) {
-            for (int x = cell.getPositionX() - 1; x <= cell.getPositionX() + 1; x++) {
-                for (int y = cell.getPositionY() - 1; y <= cell.getPositionY() + 1; y++) {
-                    if (!newSpace.isAlive(x, y) && isAliveAfterTick(x, y)) {
-                        newSpace.addCell(x, y);
-                    }
-                }
-            }
-        }
-        space = newSpace;
-    }
-
-    private boolean isAliveAfterTick(int x, int y) {
-        boolean isAlive = space.isAlive(x, y);
-        int adjacentCells = countAdjacentCells(x, y);
-        return (!isAlive && adjacentCells == 3) || (isAlive && (adjacentCells == 2 || adjacentCells == 3));
-    }
-
-    private int countAdjacentCells(int posX, int posY) {
-        int counter = 0;
-        for (int x = posX - 1; x <= posX + 1; x++) {
-            for (int y = posY - 1; y <= posY + 1; y++) {
-                if (!(x == posX && y == posY) && space.isAlive(x, y)) {
-                    counter++;
-                }
-            }
-        }
-        return counter;
     }
 
     @Override
