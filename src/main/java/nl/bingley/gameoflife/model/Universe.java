@@ -8,7 +8,7 @@ import java.util.List;
 @Component
 public class Universe {
 
-    private static final int initialSize = 256;
+    private static final int initialSize = 512;
 
     private boolean paused = false;
 

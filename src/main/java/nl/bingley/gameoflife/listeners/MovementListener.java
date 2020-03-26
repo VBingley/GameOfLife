@@ -36,10 +36,14 @@ public class MovementListener implements MouseListener, MouseMotionListener, Mou
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent mouseWheelEvent) {
+        Rectangle bounds = universePanel.getBounds();
+        Point point = mouseWheelEvent.getPoint();
+        int translateX = bounds.width / 2 - point.x;
+        int translateY = bounds.height / 2 - point.y;
         if (mouseWheelEvent.getWheelRotation() < 0) {
-            universePanel.increaseScaleMultiplier();
+            universePanel.zoomIn(translateX, translateY);
         } else {
-            universePanel.decreaseScaleMultiplier();
+            universePanel.zoomOut(translateX, translateY);
         }
     }
 

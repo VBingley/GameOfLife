@@ -43,7 +43,7 @@ public class UniversePanel extends JPanel {
 
         graphics.setColor(Color.RED);
         graphics.drawString("Gen:  " + universe.getGeneration(), 10, 20);
-        graphics.drawString("fps:  " + 1024 / refreshInterval, 10, 40);
+        graphics.drawString("FPS:  " + 1024 / refreshInterval, 10, 40);
         graphics.drawString("Born: " + space.getAllBornCells().size(), 10, 80);
         graphics.drawString("Live: " + space.getAllSurvivingCells().size(), 10, 100);
         graphics.drawString("Died: " + space.getAllDiedCells().size(), 10, 120);
@@ -78,17 +78,23 @@ public class UniversePanel extends JPanel {
         }
     }
 
-    public void increaseScaleMultiplier() {
-        translateX = (int) (translateX * ((scaleMultiplier + 1) / (double) scaleMultiplier));
-        translateY = (int) (translateY * ((scaleMultiplier + 1) / (double) scaleMultiplier));
-        scaleMultiplier++;
+    public void zoomIn(int rawTranslateX, int rawTranslateY) {
+        if (scaleMultiplier < 64) {
+            translateX = (int) (translateX * ((scaleMultiplier * 2) / (double) scaleMultiplier));
+            translateY = (int) (translateY * ((scaleMultiplier * 2) / (double) scaleMultiplier));
+            translateX = translateX + rawTranslateX;
+            translateY = translateY + rawTranslateY;
+            scaleMultiplier = scaleMultiplier * 2;
+        }
     }
 
-    public void decreaseScaleMultiplier() {
+    public void zoomOut(int rawTranslateX, int rawTranslateY) {
         if (scaleMultiplier > 1) {
-            translateX = (int) (translateX * ((scaleMultiplier - 1) / (double) scaleMultiplier));
-            translateY = (int) (translateY * ((scaleMultiplier - 1) / (double) scaleMultiplier));
-            scaleMultiplier--;
+            translateX = (int) (translateX * ((scaleMultiplier / 2) / (double) scaleMultiplier));
+            translateY = (int) (translateY * ((scaleMultiplier / 2) / (double) scaleMultiplier));
+            translateX = translateX - rawTranslateX / 2;
+            translateY = translateY - rawTranslateY / 2;
+            scaleMultiplier = scaleMultiplier / 2;
         }
     }
 
