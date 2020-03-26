@@ -18,7 +18,6 @@ public class UniversePanel extends JPanel {
     private int translateX = 0;
     private int translateY = 0;
     private int scaleMultiplier = 5;
-    private int refreshInterval = 1024;
     private boolean painting = false;
 
     private final Universe universe;
@@ -43,7 +42,7 @@ public class UniversePanel extends JPanel {
 
         graphics.setColor(Color.RED);
         graphics.drawString("Gen:  " + universe.getGeneration(), 10, 20);
-        graphics.drawString("FPS:  " + 1024 / refreshInterval, 10, 40);
+        graphics.drawString("FPS:  " + 1024 / universe.getTickSpeed(), 10, 40);
         graphics.drawString("Born: " + space.getAllBornCells().size(), 10, 80);
         graphics.drawString("Live: " + space.getAllSurvivingCells().size(), 10, 100);
         graphics.drawString("Died: " + space.getAllDiedCells().size(), 10, 120);
@@ -66,18 +65,6 @@ public class UniversePanel extends JPanel {
         graphics.drawRect(posX, posY, scaleMultiplier - 1, scaleMultiplier - 1);
     }
 
-    public void increaseRefreshInterval() {
-        if (refreshInterval < 1024) {
-            refreshInterval = refreshInterval * 2;
-        }
-    }
-
-    public void decreaseRefreshInterval() {
-        if (refreshInterval > 4) {
-            refreshInterval = refreshInterval / 2;
-        }
-    }
-
     public void zoomIn(int rawTranslateX, int rawTranslateY) {
         if (scaleMultiplier < 64) {
             translateX = (int) (translateX * ((scaleMultiplier * 2) / (double) scaleMultiplier));
@@ -96,10 +83,6 @@ public class UniversePanel extends JPanel {
             translateY = translateY - rawTranslateY / 2;
             scaleMultiplier = scaleMultiplier / 2;
         }
-    }
-
-    public int getRefreshInterval() {
-        return refreshInterval;
     }
 
     public boolean isPainting() {

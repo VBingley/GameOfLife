@@ -28,7 +28,7 @@ public class TickTimerTask extends TimerTask {
 
     @Override
     public void run() {
-        if (!universe.isPaused() && lastTick < System.currentTimeMillis() - universePanel.getRefreshInterval()) {
+        if (!universe.isPaused() && lastTick < System.currentTimeMillis() - universe.getTickSpeed()) {
             int oldBorn = lastBorn;
             int oldSurvived = lastSurvived;
             int oldDied = lastDied;

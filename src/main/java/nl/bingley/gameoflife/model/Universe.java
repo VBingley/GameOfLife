@@ -12,6 +12,7 @@ public class Universe {
 
     private boolean paused = false;
 
+    private int tickSpeed = 1024;
     private int generation;
     private Space space;
 
@@ -137,6 +138,22 @@ public class Universe {
     @Override
     public String toString() {
         return initialPattern.toString();
+    }
+
+    public void increaseTickSpeed() {
+        if (tickSpeed < 1024) {
+            tickSpeed = tickSpeed * 2;
+        }
+    }
+
+    public void decreaseTickSpeed() {
+        if (tickSpeed > 4) {
+            tickSpeed = tickSpeed / 2;
+        }
+    }
+
+    public int getTickSpeed() {
+        return tickSpeed;
     }
 
     public int getGeneration() {

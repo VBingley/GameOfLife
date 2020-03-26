@@ -30,10 +30,10 @@ public class SettingsListener implements KeyListener {
                 universe.setPaused(false);
                 break;
             case KeyEvent.VK_UP:
-                universePanel.decreaseRefreshInterval();
+                universe.decreaseTickSpeed();
                 break;
             case KeyEvent.VK_DOWN:
-                universePanel.increaseRefreshInterval();
+                universe.increaseTickSpeed();
                 break;
             case KeyEvent.VK_RIGHT:
                 if (universe.isPaused()) {
