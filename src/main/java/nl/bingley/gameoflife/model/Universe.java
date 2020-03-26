@@ -2,20 +2,18 @@ package nl.bingley.gameoflife.model;
 
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class Universe {
 
-    private static final int initialSize = 128;
+    private static final int initialSize = 256;
 
     private boolean paused = false;
 
-    private Space space;
     private int generation;
-    private int born;
-    private int alive;
-    private int died;
+    private Space space;
 
     private final StringBuilder initialPattern;
 
@@ -44,25 +42,45 @@ public class Universe {
 
     public void tick() {
         generation++;
-        born = 0;
-        alive = 0;
-        died = 0;
+        List<Cell> oldCells = new ArrayList<>();
+        oldCells.addAll(space.getAllBornCells());
+        oldCells.addAll(space.getAllSurvivingCells());
         Space newSpace = new Space();
-        for (Cell cell : space.getAliveCells()) {
+        for (Cell cell : oldCells) {
             for (int x = cell.getPositionX() - 1; x <= cell.getPositionX() + 1; x++) {
                 for (int y = cell.getPositionY() - 1; y <= cell.getPositionY() + 1; y++) {
-                    if (!newSpace.isAlive(x, y) && isAliveAfterTick(x, y)) {
-                        newSpace.addCell(x, y);
-                        if (space.isAlive(x, y)) {
-                            alive++;
-                        } else {
-                            born++;
-                        }
+                    if (x == cell.getPositionX() && y == cell.getPositionY()) {
+                        tickOnOwnCell(newSpace, x, y);
+                    } else {
+                        tickOnAdjacentCell(newSpace, x, y);
                     }
                 }
             }
         }
         space = newSpace;
+    }
+
+    private void tickOnOwnCell(Space newSpace, int x, int y) {
+        if (!newSpace.isAlive(x, y)) {
+            boolean wasAlive = space.isAlive(x, y);
+            if (isAliveAfterTick(x, y)) {
+                if (wasAlive) {
+                    newSpace.addSurvivingCell(x, y);
+                } else {
+                    newSpace.addBornCell(x, y);
+                }
+            } else if (wasAlive) {
+                newSpace.addDiedCell(x, y);
+            }
+        }
+    }
+
+    private void tickOnAdjacentCell(Space newSpace, int x, int y) {
+        if (!newSpace.isAlive(x, y) && !space.isAlive(x, y)) {
+            if (isAliveAfterTick(x, y)) {
+                newSpace.addBornCell(x, y);
+            }
+        }
     }
 
     private boolean isAliveAfterTick(int x, int y) {
@@ -92,7 +110,7 @@ public class Universe {
             for (int x = xStart; x < xStart + initialSize; x++) {
                 long random = Math.round(Math.random());
                 if (random == 1) {
-                    space.addCell(x, y);
+                    space.addBornCell(x, y);
                     initialPattern.append('0');
                 } else {
                     initialPattern.append('.');
@@ -110,7 +128,7 @@ public class Universe {
             int yStart = -rows.length / 2;
             for (int y = yStart; y < yStart + rows.length; y++) {
                 if (rows[y - yStart].charAt(x - xStart) == '0') {
-                    space.addCell(x, y);
+                    space.addBornCell(x, y);
                 }
             }
         }
@@ -133,19 +151,7 @@ public class Universe {
         this.paused = paused;
     }
 
-    public Collection<Cell> getAliveCells() {
-        return space.getAliveCells();
-    }
-
-    public int getBorn() {
-        return born;
-    }
-
-    public int getAlive() {
-        return alive;
-    }
-
-    public int getDied() {
-        return died;
+    public Space getSpace() {
+        return space;
     }
 }

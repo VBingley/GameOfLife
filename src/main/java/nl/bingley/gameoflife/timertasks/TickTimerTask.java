@@ -9,10 +9,16 @@ import java.util.TimerTask;
 @Component
 public class TickTimerTask extends TimerTask {
 
+    private static final int MAX_GENERATION = 20000;
+
     private final Universe universe;
     private final UniversePanel universePanel;
-    private final int generationRecord = 500;
+    private int generationRecord = 8148;
     private long lastTick;
+
+    private int lastBorn;
+    private int lastSurvived;
+    private int lastDied;
 
     public TickTimerTask(Universe universe, UniversePanel universePanel) {
         this.universe = universe;
@@ -23,27 +29,39 @@ public class TickTimerTask extends TimerTask {
     @Override
     public void run() {
         if (!universe.isPaused() && lastTick < System.currentTimeMillis() - universePanel.getRefreshInterval()) {
-            int lastBorn = universe.getBorn();
-            int lastAlive = universe.getAlive();
-            int lastDied = universe.getDied();
+            int oldBorn = lastBorn;
+            int oldSurvived = lastSurvived;
+            int oldDied = lastDied;
+            lastBorn = universe.getSpace().getAllBornCells().size();
+            lastSurvived = universe.getSpace().getAllSurvivingCells().size();
+            lastDied = universe.getSpace().getAllDiedCells().size();
             universe.tick();
-//            if (lastBorn == lastDied && universe.getBorn() == universe.getDied()
-//                    && lastBorn == universe.getBorn() && lastAlive == universe.getAlive()
-//                    && lastDied == universe.getDied()) {
-//                if (universe.getGeneration() >= generationRecord) {
-//                    System.out.println("Universe lasted to gen " + universe.getGeneration() + ':');
-//                    System.out.println(universe.toString());
-//                    generationRecord = universe.getGeneration();
-//                    universe.setPaused(true);
-//                } else {
-//                    universe.refresh();
-//                }
-//            } else if (universe.getGeneration() > 3500) {
-//                universe.setPaused(true);
-//            }
+            if (isUniverseStable(oldBorn, oldSurvived, oldDied)) {
+                if (universe.getGeneration() >= generationRecord) {
+                    System.out.println("Universe lasted to gen " + universe.getGeneration() + ':');
+                    System.out.println(universe.toString());
+                    generationRecord = universe.getGeneration();
+                    universe.setPaused(true);
+                } else {
+                    universe.refresh();
+                }
+            } else {
+                if (universe.getGeneration() > MAX_GENERATION) {
+                    universe.setPaused(true);
+                }
+            }
             lastTick = System.currentTimeMillis();
         } else if (universe.isPaused()) {
             lastTick = System.currentTimeMillis();
         }
+    }
+
+    private boolean isUniverseStable(int oldBorn, int oldSurvived, int oldDied) {
+        int currentBorn = universe.getSpace().getAllBornCells().size();
+        int currentSurvived = universe.getSpace().getAllSurvivingCells().size();
+        int currentDied = universe.getSpace().getAllDiedCells().size();
+        return currentBorn == currentDied && lastBorn == lastDied && oldBorn == oldDied
+            && currentBorn == lastBorn && currentBorn == oldBorn
+            && currentSurvived == lastSurvived && currentSurvived == oldSurvived;
     }
 }

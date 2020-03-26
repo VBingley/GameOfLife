@@ -27,12 +27,13 @@ public class SettingsListener implements KeyListener {
             case KeyEvent.VK_ENTER:
             case KeyEvent.VK_BACK_SPACE:
                 universe.refresh();
+                universe.setPaused(false);
                 break;
             case KeyEvent.VK_UP:
-                universePanel.increaseRefreshInterval();
+                universePanel.decreaseRefreshInterval();
                 break;
             case KeyEvent.VK_DOWN:
-                universePanel.decreaseRefreshInterval();
+                universePanel.increaseRefreshInterval();
                 break;
             case KeyEvent.VK_RIGHT:
                 if (universe.isPaused()) {
@@ -45,6 +46,7 @@ public class SettingsListener implements KeyListener {
                 break;
             case KeyEvent.VK_R:
                 universe.restart();
+                universe.setPaused(false);
                 break;
         }
     }

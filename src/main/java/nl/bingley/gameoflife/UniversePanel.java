@@ -1,14 +1,13 @@
 package nl.bingley.gameoflife;
 
 import nl.bingley.gameoflife.model.Cell;
+import nl.bingley.gameoflife.model.Space;
 import nl.bingley.gameoflife.model.Universe;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class UniversePanel extends JPanel {
@@ -18,7 +17,7 @@ public class UniversePanel extends JPanel {
     private int height = 0;
     private int translateX = 0;
     private int translateY = 0;
-    private final int scaleMultiplier = 5;
+    private int scaleMultiplier = 5;
     private int refreshInterval = 1024;
     private boolean painting = false;
 
@@ -37,17 +36,17 @@ public class UniversePanel extends JPanel {
         width = bounds.width;
         height = bounds.height;
         graphics.fillRect(0, 0, width, height);
-        paintCells(graphics, universe.getAliveCells(), Color.GREEN, Color.BLUE);
-//        paintCells(graphics, (universe.getBornCells()), Color.GREEN, Color.BLUE);
-//        paintCells(graphics, (universe.getAliveCells()), Color.BLUE, Color.BLUE);
-//        paintCells(graphics, (universe.getDiedCells()), Color.GRAY, Color.PINK);
+        Space space = universe.getSpace();
+        paintCells(graphics, space.getAllBornCells(), Color.GREEN, Color.BLUE);
+        paintCells(graphics, (space.getAllSurvivingCells()), Color.BLUE, Color.BLUE);
+        paintCells(graphics, (space.getAllDiedCells()), Color.GRAY, Color.PINK);
 
         graphics.setColor(Color.RED);
         graphics.drawString("Gen:  " + universe.getGeneration(), 10, 20);
-        graphics.drawString("Ref:  " + refreshInterval, 10, 40);
-        graphics.drawString("Born: " + universe.getBorn(), 10, 80);
-        graphics.drawString("Live: " + universe.getAlive(), 10, 100);
-        graphics.drawString("Died: " + universe.getDied(), 10, 120);
+        graphics.drawString("fps:  " + 1024 / refreshInterval, 10, 40);
+        graphics.drawString("Born: " + space.getAllBornCells().size(), 10, 80);
+        graphics.drawString("Live: " + space.getAllSurvivingCells().size(), 10, 100);
+        graphics.drawString("Died: " + space.getAllDiedCells().size(), 10, 120);
         graphics.dispose();
         painting = false;
     }
@@ -60,20 +59,11 @@ public class UniversePanel extends JPanel {
         }
     }
 
-    private Set<Cell> removeInvisibleCells(Set<Cell> cells) {
-        int cellsX = (width + translateX / 2) / scaleMultiplier / 2;
-        int cellsY = (height + translateY / 2) / scaleMultiplier / 2;
-        return cells.stream()
-                .filter(cell -> cell.getPositionX() >= cellsX && cell.getPositionX() <= cellsX + translateX / scaleMultiplier
-                        && cell.getPositionY() >= cellsY && cell.getPositionY() <= cellsY + translateY / scaleMultiplier)
-                .collect(Collectors.toSet());
-    }
-
     private void paintCell(Graphics graphics, int posX, int posY, Color fill, Color border) {
         graphics.setColor(fill);
-        graphics.fillRect(posX, posY, scaleMultiplier, scaleMultiplier);
+        graphics.fillRect(posX, posY, scaleMultiplier - 1, scaleMultiplier - 1);
         graphics.setColor(border);
-        graphics.drawRect(posX, posY, scaleMultiplier, scaleMultiplier);
+        graphics.drawRect(posX, posY, scaleMultiplier - 1, scaleMultiplier - 1);
     }
 
     public void increaseRefreshInterval() {
@@ -88,12 +78,22 @@ public class UniversePanel extends JPanel {
         }
     }
 
-    public int getRefreshInterval() {
-        return refreshInterval;
+    public void increaseScaleMultiplier() {
+        translateX = (int) (translateX * ((scaleMultiplier + 1) / (double) scaleMultiplier));
+        translateY = (int) (translateY * ((scaleMultiplier + 1) / (double) scaleMultiplier));
+        scaleMultiplier++;
     }
 
-    public int getScaleMultiplier() {
-        return scaleMultiplier;
+    public void decreaseScaleMultiplier() {
+        if (scaleMultiplier > 1) {
+            translateX = (int) (translateX * ((scaleMultiplier - 1) / (double) scaleMultiplier));
+            translateY = (int) (translateY * ((scaleMultiplier - 1) / (double) scaleMultiplier));
+            scaleMultiplier--;
+        }
+    }
+
+    public int getRefreshInterval() {
+        return refreshInterval;
     }
 
     public boolean isPainting() {

@@ -7,9 +7,9 @@ public class SpaceTest {
     @Test
     public void testAddCell() {
         Space space = new Space();
-        space.addCell(0, 600);
-        space.addCell(600, 600);
-        space.addCell(0, -600);
-        space.addCell(-600, 0);
+        space.addBornCell(0, 600);
+        space.addBornCell(600, 600);
+        space.addBornCell(0, -600);
+        space.addBornCell(-600, 0);
     }
 }

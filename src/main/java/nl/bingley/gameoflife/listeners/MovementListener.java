@@ -7,9 +7,11 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 @Component
-public class MovementListener implements MouseListener, MouseMotionListener {
+public class MovementListener implements MouseListener, MouseMotionListener, MouseWheelListener {
 
     private final UniversePanel universePanel;
     private Point origin;
@@ -30,6 +32,15 @@ public class MovementListener implements MouseListener, MouseMotionListener {
         universePanel.addTranslateX(target.x - origin.x);
         universePanel.addTranslateY(target.y - origin.y);
         origin = target;
+    }
+
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent mouseWheelEvent) {
+        if (mouseWheelEvent.getWheelRotation() < 0) {
+            universePanel.increaseScaleMultiplier();
+        } else {
+            universePanel.decreaseScaleMultiplier();
+        }
     }
 
     @Override

@@ -16,7 +16,7 @@ public class Config {
     public Timer scheduleTimers(RenderTimerTask renderTimerTask, TickTimerTask tickTimerTask) {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(renderTimerTask, 0, 16);
-        timer.scheduleAtFixedRate(tickTimerTask, 0, 8);
+        timer.scheduleAtFixedRate(tickTimerTask, 0, 4);
         return timer;
     }
 }

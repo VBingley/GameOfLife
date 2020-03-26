@@ -8,7 +8,9 @@ public class Space {
 
     private static final int SIZE = 50;
 
-    private final List<Cell> aliveCells;
+    private final List<Cell> bornCells;
+    private final List<Cell> survivingCells;
+    private final List<Cell> diedCells;
 
     private Boolean[][] plusXplusY;
     private Boolean[][] plusXminY;
@@ -16,15 +18,25 @@ public class Space {
     private Boolean[][] minXminY;
 
     public Space() {
-        aliveCells = new ArrayList<>();
+        bornCells = new ArrayList<>();
+        survivingCells = new ArrayList<>();
+        diedCells = new ArrayList<>();
         plusXplusY = new Boolean[SIZE][SIZE];
         plusXminY = new Boolean[SIZE][SIZE];
         minXplusY = new Boolean[SIZE][SIZE];
         minXminY = new Boolean[SIZE][SIZE];
     }
 
-    public List<Cell> getAliveCells() {
-        return aliveCells;
+    public List<Cell> getAllBornCells() {
+        return bornCells;
+    }
+
+    public List<Cell> getAllSurvivingCells() {
+        return survivingCells;
+    }
+
+    public List<Cell> getAllDiedCells() {
+        return diedCells;
     }
 
     public boolean isAlive(int x, int y) {
@@ -43,8 +55,21 @@ public class Space {
         }
     }
 
-    public void addCell(int x, int y) {
-        aliveCells.add(new Cell(x, y));
+    public void addBornCell(int x, int y) {
+        bornCells.add(new Cell(x, y));
+        addToGrid(x, y);
+    }
+
+    public void addSurvivingCell(int x, int y) {
+        survivingCells.add(new Cell(x, y));
+        addToGrid(x, y);
+    }
+
+    public void addDiedCell(int x, int y) {
+        diedCells.add(new Cell(x, y));
+    }
+
+    private void addToGrid(int x, int y) {
         if (x >= 0 && y >= 0) {
             plusXplusY = setValue(plusXplusY, x, y);
         } else if (x >= 0) { // y<0 implied
