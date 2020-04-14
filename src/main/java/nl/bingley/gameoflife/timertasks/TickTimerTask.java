@@ -1,6 +1,5 @@
 package nl.bingley.gameoflife.timertasks;
 
-import nl.bingley.gameoflife.UniversePanel;
 import nl.bingley.gameoflife.model.Universe;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +11,6 @@ public class TickTimerTask extends TimerTask {
     private static final int MAX_GENERATION = 20000;
 
     private final Universe universe;
-    private final UniversePanel universePanel;
     private int generationRecord = 8148;
     private long lastTick;
 
@@ -20,9 +18,8 @@ public class TickTimerTask extends TimerTask {
     private int lastSurvived;
     private int lastDied;
 
-    public TickTimerTask(Universe universe, UniversePanel universePanel) {
+    public TickTimerTask(Universe universe) {
         this.universe = universe;
-        this.universePanel = universePanel;
         lastTick = System.currentTimeMillis();
     }
 

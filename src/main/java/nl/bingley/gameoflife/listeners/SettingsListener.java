@@ -1,6 +1,5 @@
 package nl.bingley.gameoflife.listeners;
 
-import nl.bingley.gameoflife.UniversePanel;
 import nl.bingley.gameoflife.model.Universe;
 import org.springframework.stereotype.Component;
 
@@ -11,11 +10,9 @@ import java.awt.event.KeyListener;
 public class SettingsListener implements KeyListener {
 
     private final Universe universe;
-    private final UniversePanel universePanel;
 
-    public SettingsListener(Universe universe, UniversePanel universePanel) {
+    public SettingsListener(Universe universe) {
         this.universe = universe;
-        this.universePanel = universePanel;
     }
 
     @Override
